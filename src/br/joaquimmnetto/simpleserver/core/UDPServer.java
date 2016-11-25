@@ -13,10 +13,15 @@ import org.json.JSONObject;
 import br.joaquimmnetto.simpleserver.logger.ServerLog;
 import br.joaquimmnetto.simpleserver.logger.ServerLogImpl;
 
+/**
+ * An UDP implementation of server.
+ * @author KithLenovo
+ *
+ */
 public class UDPServer implements Server{
 
 	private DatagramSocket sock;
-	private byte[] buffer = new byte[512];
+	private byte[] buffer;
 	
 	private Services services = new Services();
 	private ServerLog log;
@@ -24,20 +29,30 @@ public class UDPServer implements Server{
 	private Executor workerExec;
 	private Thread serverThread;
 	private boolean running;
-
-	public UDPServer(int lookupPort, int poolSize, ServerLog log) {
+	/**
+	 * 
+	 * @param port - Port to which this server should listen to
+	 * @param poolSize - Max number of simultaneous workers
+	 * @param bufferSize - Size of the buffer used to store requests from client
+	 * @param log - Log associated to this server
+	 */
+	public UDPServer(int port, int poolSize, int bufferSize, ServerLog log) {
 		try {
 			this.log = log;
 			workerExec = Executors.newFixedThreadPool(poolSize);
-			sock = new DatagramSocket(lookupPort);
-			buffer = new byte[512];
+			sock = new DatagramSocket(port);
+			buffer = new byte[bufferSize];
 		} catch (SocketException e) {
 			log.printException(e, null);
 		}
 	}
-	
+	/**
+	 * The standard size for the buffer on this constructor is 512, and the standard log will be used.
+	 * @param lookupPort
+	 * @param poolSize
+	 */
 	public UDPServer(int lookupPort, int poolSize) {
-		this(lookupPort, poolSize, ServerLogImpl.getStandardLog());
+		this(lookupPort, poolSize, 512, ServerLogImpl.getStandardLog());
 	}
 	
 
@@ -83,7 +98,7 @@ public class UDPServer implements Server{
 	}
 
 	private UDPWorker listen() {
-		DatagramPacket pack = new DatagramPacket(buffer, 512);
+		DatagramPacket pack = new DatagramPacket(buffer, buffer.length);
 		try {
 			sock.receive(pack);
 			new JSONObject(new String(pack.getData()));

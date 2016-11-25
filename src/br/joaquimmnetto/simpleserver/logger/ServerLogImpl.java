@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.PrintStream;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 public class ServerLogImpl implements ServerLog {
 
@@ -14,10 +16,13 @@ public class ServerLogImpl implements ServerLog {
 	private boolean enabled;
 
 	private static ServerLogImpl standardLog;
-
+	
 	private static final String LOG_FILE_NAME_PREFIX = "Log_";
 	private static final String LOG_FILE_NAME_SUFIX = ".log";
 
+	private static final Executor logExecutor = Executors.newSingleThreadExecutor();
+	
+	
 	public static void generateNewStandardLog() {
 
 		try {
@@ -34,6 +39,9 @@ public class ServerLogImpl implements ServerLog {
 	}
 
 	public static ServerLogImpl getStandardLog() {
+		if (standardLog == null) {
+			generateNewStandardLog();
+		}
 		return standardLog;
 	}
 
@@ -86,9 +94,14 @@ public class ServerLogImpl implements ServerLog {
 		}
 	}
 
-	private synchronized void println(PrintStream stream, String message) {
+	private synchronized void println(final PrintStream stream, final String message) {
 		if (enabled) {
-			stream.println(message);
+			logExecutor.execute(new Runnable() {
+				@Override
+				public void run() {
+					stream.println(message);
+				}
+			});
 		}
 	}
 

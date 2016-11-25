@@ -11,6 +11,12 @@ import org.json.JSONObject;
 import br.joaquimmnetto.simpleserver.logger.ServerLog;
 import br.joaquimmnetto.simpleserver.utils.JSONUtils;
 
+
+/**
+ *  A Runnable implementation of the work to be executed by each call to the UDP server.
+ * @author Joaquim Neto
+ *
+ */
 public class UDPWorker implements Runnable {
 	
 	
@@ -20,7 +26,13 @@ public class UDPWorker implements Runnable {
 	private Services services;
 	
 	private ServerLog log;
-
+	/**
+	 * 
+	 * @param sock - the socket with the connection to the client.
+	 * @param pack - The datagram package with the client request
+	 * @param services - The server provided by the server
+	 * @param log - The log object registered on the server.
+	 */
 	public UDPWorker(DatagramSocket sock, DatagramPacket pack, Services services, ServerLog log) {
 		this.services = services;
 		this.sock = sock;
@@ -33,9 +45,9 @@ public class UDPWorker implements Runnable {
 		try {
 			JSONObject request = new JSONObject(new String(recvPack.getData()));
 
-			log.println("Lookup recebido:\n" + request.toString(4));
+			log.println("UDP message received:\n" + request.toString(4));
 
-			command = request.getString("comando");
+			command = request.getString("command");
 			JSONArray args = request.optJSONArray("args");
 
 			JSONObject response = services.executeService(command,args);
@@ -44,12 +56,12 @@ public class UDPWorker implements Runnable {
 
 			DatagramPacket sendPack = new DatagramPacket(responseStr.getBytes(), responseStr.length(),
 					recvPack.getAddress(), recvPack.getPort());
-			log.println("Enviando resposta:\n" + response.toString(4));
+			log.println("Sending UDP response:\n" + response.toString(4));
 			sock.send(sendPack);
 
 		} catch (IOException | JSONException e) {
 			log.printException(e, command);
-			JSONUtils.criarJSONFalha(e);
+			JSONUtils.createJSONFail(e);
 		}
 
 	}

@@ -7,6 +7,12 @@ import java.util.concurrent.Executors;
 import br.joaquimmnetto.simpleserver.logger.ServerLog;
 import br.joaquimmnetto.simpleserver.logger.ServerLogImpl;
 
+
+/**
+ * TCP implementation of Server.
+ * @author Joaquim Neto
+ *
+ */
 public class TCPServer implements Server {
 
 	private ServerSocket sSock;
@@ -18,16 +24,25 @@ public class TCPServer implements Server {
 	private boolean running;
 
 	private ServerLog log = ServerLogImpl.getStandardLog();
-
-	public TCPServer(int porta, int poolSize) {
+	/**
+	 * Creates a new TCPServer
+	 * @param port - The port in which the server should be started on.
+	 * @param poolSize - The maximum simultaneous number of workers to be executed on this server
+	 */
+	public TCPServer(int port, int poolSize) {
 		try {
 			workerExec = Executors.newFixedThreadPool(poolSize);
-			sSock = new ServerSocket(porta);
+			sSock = new ServerSocket(port);
 		} catch (IOException e) {
 			log.printException(e);
 		}
 	}
-
+	/**
+	 * Creates a new TCPServer
+	 * @param port - The port in which the server should be started on.
+	 * @param poolSize - The maximum simultaneous number of workers to be executed on this server
+	 * @param log - Custom Log to receive this server info output.
+	 */
 	public TCPServer(int porta, int poolSize, ServerLog log) {
 		try {
 			this.log = log;
@@ -77,7 +92,11 @@ public class TCPServer implements Server {
 	public void stop() {
 		running = false;
 	}
-
+	
+	/**
+	 * Listens to a new connection, and starts a TCPWorker when its accepted.
+	 * @return
+	 */
 	private TCPWorker listen() {
 		try {
 			return new TCPWorker(sSock.accept(), services, log);
@@ -88,7 +107,10 @@ public class TCPServer implements Server {
 		return null;
 
 	}
-
+	/**
+	 * Close the ServerSocket associated with this server.
+	 * @throws IOException
+	 */
 	public void close() throws IOException {
 		if (sSock != null) {
 			sSock.close();
