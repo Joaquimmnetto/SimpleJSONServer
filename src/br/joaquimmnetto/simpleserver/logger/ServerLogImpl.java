@@ -33,7 +33,7 @@ public class ServerLogImpl implements ServerLog {
 					+ current.get(Calendar.SECOND) + LOG_FILE_NAME_SUFIX;
 			standardLog = new ServerLogImpl(System.out, System.err, new PrintStream(logFileName));
 		} catch (FileNotFoundException e) {
-			// TODO: vish, e ai? Stack trace no stdout mesmo?
+			// TODO: So... stacktrace goes to stdout?
 			e.printStackTrace();
 		}
 	}

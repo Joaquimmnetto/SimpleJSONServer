@@ -43,7 +43,7 @@ public class TCPWorker implements Runnable {
 			
 			log.println("TCP message received:\n" + clientMsg.toString(4));
 
-			command = clientMsg.getString("comando");
+			command = clientMsg.getString("command");
 			JSONArray args = clientMsg.optJSONArray("args");
 
 			response = services.executeService(command, args);
